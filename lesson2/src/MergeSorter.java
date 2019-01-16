@@ -5,7 +5,7 @@ import java.util.Arrays;
  *
  * @author Михаил Морин
  */
-class MergeSorter {
+abstract class MergeSorter {
     /**
      * Метод сортировка элементов массива
      *
