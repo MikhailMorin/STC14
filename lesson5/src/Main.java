@@ -1,78 +1,43 @@
 import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class Main {
-
-    enum SourceType {WEB, FTP, FILE, UNKNOWN};
-    static private SourceType sourceType;
+    static ExecutorService threadPool;
+    static String dirName = "C:\\Users\\Mikhail\\Desktop\\path\\warpeace";
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String[] sources = {"https://habr.com/ru/post/321344/"/*, "https://habr.com/ru/company/tm/blog/435562/"*/};
-        String[] words = {"файл","программист", "приложения"};
+        File folder = new File(dirName);
+        String[] sources = folder.list();
+
+        String[] words = {"to", "the", "you", "by", "and", "that", "was", "see", "not", "had"};
+//        String[] sources = {/*"C:\\Users\\Mikhail\\Desktop\\path\\warpeace.txt", "C:\\Users\\Mikhail\\Desktop\\path\\warpeace1.txt"*/"https://habr.com/ru/post/321344/", "https://habr.com/ru/company/tm/blog/435562/"};
+//        String[] words = {/*"Petersburg",*/"программист", "приложения"};
+
+        Main.threadPool = Executors.newFixedThreadPool(10);
         getOccurencies(sources,words, "C:\\Users\\Mikhail\\Desktop\\path\\file.txt");
     }
 
     static void getOccurencies(String[] sources, String[] words, String res) throws IOException, InterruptedException /*throws*/ {
-        BufferedReader br = null;
-        FileWriter fw  = new FileWriter(res);
+        Set<String> wordsSet = new HashSet<>();
+        wordsSet.addAll(Arrays.asList(words));
 
-        DataParser.setWordList(words);
-        DataParser.setOutputStream(fw);
+        BufferedWriter bw  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(res)));
+        DataParser.setOutput(bw);
 
-        int threads = 1; // Количество параллельных потоков
-        List<DataParser> l = new LinkedList<>();
-        for (int i = 0; i < sources.length; i++) {
-            DataParser dp = new DataParser();
-            l.add(dp);
+        for (int i = 0; i < 2000; i++) {
+            Runnable resource = new DataParser(dirName + "\\" + sources[i], wordsSet);
+            threadPool.submit(resource);
         }
+//        for (String s : sources) {
+//            System.out.println("sources");
+//            Runnable resource = new DataParser(s, wordsSet);
+//            threadPool.submit(resource);
+//        }
+        threadPool.shutdown();
+        threadPool.awaitTermination(3600, TimeUnit.SECONDS);
+        bw.close();
 
-        for (String source : sources) {
-            sourceType = detectionType(source);
-            if(sourceType.equals(SourceType.UNKNOWN))
-                continue;
-
-            switch (sourceType){
-                case FTP: {
-                    URL url = new URL(source);
-                    URLConnection urlc = url.openConnection();
-                    br = new BufferedReader(new InputStreamReader(urlc.getInputStream()));
-                    break;
-                }
-                case WEB:{
-                    br = new BufferedReader(new InputStreamReader(new URL(source).openStream()));
-                    break;
-                }
-                case FILE:{
-                    br = new BufferedReader(new InputStreamReader(new FileInputStream(source)));
-                    break;
-                }
-            }
-
-            DataParser.setInput(br);
-
-            for (DataParser dp : l)
-                dp.start();
-            System.out.println("Threads started");
-            for (DataParser dp : l)
-                dp.join();
-            br.close();
-        }
-
-        fw.close();
-    }
-
-    private static SourceType detectionType(String source){
-        if (source.matches("^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w\\.-]*)*\\/?$"))
-            return SourceType.WEB;
-        else if (source.matches("^(ftps?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w\\.-]*)*\\/?$"))
-            return SourceType.FTP;
-        else if (source.matches("((\\w{1}:\\\\(([A-z]|[0-9]|\\s)+)\\\\\\w+\\.\\w+))|(\\w{1}:\\\\(\\w+\\.\\w+))"))
-            return SourceType.FILE;
-        else
-            return SourceType.UNKNOWN;
     }
 }
 
