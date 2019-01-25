@@ -1,6 +1,7 @@
 package stc.lesson5;
 
 import org.jsoup.Jsoup;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -10,14 +11,16 @@ import java.util.regex.*;
  * Класс, реализующий разбор исходного ресурса с целью поиска
  * требуемых слов.
  */
-public class DataParser extends Thread {
-    enum SourceType {WEB, FTP, FILE, UNKNOWN};
-    SourceType sourceType;
-    String source;
+class DataParser extends Thread {
+    enum SourceType {WEB, FTP, FILE, UNKNOWN}
 
-    private static final String UNCOMPLETED_SENTENCE = "[A-ZА-Я][^!?.]+$"; // Неоконченное предложение
-    private static final String ENDOF_SENTENCE = "^[^A-ZА-Я!?.]+[!?.]";    // Конец предложение
-    private static final String FULL_SENTENCE = "[A-ZА-Я][^!?.]+[!?.]";    // Целое предложение
+    ;
+    private SourceType sourceType;
+    private String source;
+
+    private final String UNCOMPLETED_SENTENCE = "[A-ZА-Я][^!?.]+$"; // Неоконченное предложение
+    private final String ENDOF_SENTENCE = "^[^A-ZА-Я!?.]+[!?.]";    // Конец предложение
+    private final String FULL_SENTENCE = "[A-ZА-Я][^!?.]+[!?.]";    // Целое предложение
 
     private final Pattern uncompletedSentencePattern;
     private final Pattern endofSentencePattern;
@@ -25,15 +28,16 @@ public class DataParser extends Thread {
     private String unfinishedSentence = "";
 
     private Set<String> wordList;
-    private BufferedReader input;
-    private static BufferedWriter output;
+    final private BufferedWriter output;
 
     /**
      * Конструктор, принимающий в качестве параметров исходные данные для разбора.
-     * @param source - источник данных.
+     *
+     * @param source   - источник данных.
      * @param wordList - список искомых слов.
      */
-    public DataParser(String source, Set<String> wordList){
+    DataParser(BufferedWriter fw, String source, Set<String> wordList) {
+        this.output = fw;
         this.source = source;
         this.sourceType = getSourceType(source);
         this.wordList = wordList;
@@ -44,64 +48,54 @@ public class DataParser extends Thread {
 
     /**
      * Определение типа ресурса по адресу ресурса.
+     *
      * @param source - адрес ресурса
      * @return тип ресурса в формате {@code SourceType}
      */
-    private SourceType getSourceType(String source){
-        if (source.matches("^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w\\.-]*)*\\/?$"))
+    private SourceType getSourceType(String source) {
+        if (source.matches("^(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w.-]*)*/?$")) {
             return SourceType.WEB;
-        else if (source.matches("^(ftps?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w\\.-]*)*\\/?$"))
+        } else if (source.matches("^(ftps?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w.-]*)*/?$")) {
             return SourceType.FTP;
-        else if(source.matches("[A-ZА-Я].+?[.?!]{1,}.\\w+")) {
-//        else if(source.matches("((\\w{1}:\\\\(([A-z]|[0-9]|\\s)+)\\\\\\w+\\.\\w+))|(\\w{1}\\\\(([a-zA-Zа-яА-Я0-9 ()])+\\.\\w+))")) {
+        } else if (source.matches("^(.*/)([^/]+?)(\\.[^.]+)?$")) {
             return SourceType.FILE;
-        }
-        else
+        } else {
             return SourceType.UNKNOWN;
+        }
     }
 
     /**
      * Создание потока для работы с ресурсом.
+     *
      * @return созданый поток.
-     * @throws IOException
+     * @throws IOException - в случае ошибки при попытке создания входного потока
      */
     private BufferedReader openResource() throws IOException {
-        BufferedReader input = null;
-        switch (sourceType){
+        switch (sourceType) {
             case FTP: {
                 URL url = new URL(source);
                 URLConnection urlc = url.openConnection();
-                input = new BufferedReader(new InputStreamReader(urlc.getInputStream()));
-                break;
+                return new BufferedReader(new InputStreamReader(urlc.getInputStream()));
             }
-            case WEB:{
-                input = new BufferedReader(new StringReader(Jsoup.connect(source).get().text()));
-//                input = new BufferedReader(new InputStreamReader(new URL(source).openStream()));
-                break;
+            case WEB: {
+                return new BufferedReader(new StringReader(Jsoup.connect(source).get().text()));
             }
-            case FILE:{
-                input = new BufferedReader(new InputStreamReader(new FileInputStream(source)));
-                break;
+            case FILE: {
+                return new BufferedReader(new InputStreamReader(new FileInputStream(source)));
             }
             case UNKNOWN:
-                break;
+            default: {
+                throw new IOException();
+            }
         }
-        return input;
-    }
-
-    /**
-     * Сеттер для установки выходного ресурса (для сохранения результатов работы).
-     * @param fw - выходной поток.
-     */
-    public static void setOutput(BufferedWriter fw){
-        output = fw;
     }
 
     /**
      * Поиск в предложении соответствия регулярному выражению.
+     *
      * @param pattern - регулярное выражение.
      * @param content - предложение
-     * @return  - массив найденых соответствий
+     * @return - массив найденых соответствий
      */
     private String[] findMatches(Pattern pattern, String content) {
         List<String> matches = new LinkedList<>();
@@ -114,16 +108,16 @@ public class DataParser extends Thread {
 
     /**
      * Метд проверки содержания искомых слов в предложении.
+     *
      * @param sentence - предложение, в котором осуществляется поиск.
      * @return - найдено-ли совпадение (true/false)
      */
-    private boolean isContains(String sentence){
+    private boolean isContains(String sentence) {
         for (String s : wordList) {
-            if(sentence.contains(s)) {
+            if (sentence.contains(s)) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -131,7 +125,7 @@ public class DataParser extends Thread {
      * Разбор текстовой строки.
      *
      * @param line - разбираемая строка
-     * @throws IOException
+     * @throws IOException - в случае ошибки при работе с выходным потоком
      */
     private void checkLine(String line) throws IOException {
         /*
@@ -147,7 +141,7 @@ public class DataParser extends Thread {
             String continuation = endOfStcs[0];
             String sentence = unfinishedSentence + " " + continuation;
 
-            if(isContains(sentence)){
+            if (isContains(sentence)) {
                 synchronized (output) {
                     sentence = sentence.replaceAll("[^a-zA-Zа-яА-Я\\d\\s]", "");
                     output.write(sentence + "\n");
@@ -160,7 +154,7 @@ public class DataParser extends Thread {
         Поиск целых предложений в строке.
          */
         for (String matched : findMatches(fullSentencePattern, line)) {
-            if(isContains(matched)){
+            if (isContains(matched)) {
                 synchronized (output) {
                     matched = matched.replaceAll("[^a-zA-Zа-яА-Я\\d\\s]", "");
                     output.write(matched + "\n");
@@ -178,27 +172,29 @@ public class DataParser extends Thread {
     }
 
     /**
-     *  Чтение из потока и разбор считанной информации.
-     * @throws IOException
+     * Чтение из потока и разбор считанной информации.
+     *
+     * @throws IOException - в случае ошибки при работе с входным или выходным потоком
      */
-    public void parse() throws IOException {
+    private void parse() throws IOException {
         long startTime = System.nanoTime();
         try (BufferedReader r = this.openResource()) {
-            input = r;
             String line;
-            while ((line = input.readLine()) != null)
+            while ((line = r.readLine()) != null) {
                 checkLine(line);
+            }
         }
         long fullTime = System.nanoTime() - startTime;
-        System.out.println("Ресурс: " + source + ",  Время: " + fullTime / 1000000 + " мс.");
+        System.out.println(this + ": " + source + ",  Время: " + fullTime / 1_000_000 + " мс.");
     }
 
     @Override
     public void run() {
         try {
-            System.out.println("ЗАПУСК");
+            System.out.println("ЗАПУСК " + this);
             parse();
         } catch (IOException e) {
+            System.out.println("Ошибка при работе с ресурсами в " + this);
             e.printStackTrace();
         }
     }
