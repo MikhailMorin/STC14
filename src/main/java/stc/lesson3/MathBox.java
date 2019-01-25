@@ -8,61 +8,68 @@ import java.util.*;
  * Имеется возможность добавлять и удалять элементы из коллекции.
  * Имеется возможность получить сумму всех элементов коллекции,
  * а также коллецию, состоящую из элементов, делёных на конкретное значение.
+ *
  * @author Михаил Морин
  * @see LinkedList
  */
-public class MathBox<T extends Number> extends ObjectBox {
+class MathBox<T extends Number> extends ObjectBox {
 
-    /** Конструктор, принимающий в качестве аргумента массив.
-     *  Т.к. тип используемой коллекции  {@code TreeSet},
-     *  данные будут уникаьными и отсортированными.
+    /**
+     * Конструктор, принимающий в качестве аргумента массив.
+     * Т.к. тип используемой коллекции  {@code TreeSet},
+     * данные будут уникаьными и отсортированными.
+     *
      * @param arr - входной массив
      */
-    public MathBox(T[] arr) {
+    MathBox(T[] arr) {
         Collections.addAll(set, arr);
     }
 
     /**
      * Метод, суммирующий все элементы коллекции {@code ObjectBox#list}.
+     *
      * @return сумма всех элементов коллекции
      */
-    public T summator() {
+    T summator() {
         Iterator<Object> iter = set.iterator();
         Number sum;
 
-        if(iter.hasNext())
-            sum = (Number)iter.next();
-        else
+        if (iter.hasNext()) {
+            sum = (Number) iter.next();
+        } else {
             return null;
+        }
 
-        while (iter.hasNext()){
-            Number n = (Number)iter.next();
-            if (sum instanceof Byte)
+        while (iter.hasNext()) {
+            Number n = (Number) iter.next();
+            if (sum instanceof Byte) {
                 sum = (Byte) sum + n.byteValue();
-            else if (sum instanceof Short)
+            } else if (sum instanceof Short) {
                 sum = (Short) sum + n.shortValue();
-            else if (sum instanceof Integer)
+            } else if (sum instanceof Integer) {
                 sum = (Integer) sum + n.intValue();
-            else if (sum instanceof Long)
+            } else if (sum instanceof Long) {
                 sum = (Long) sum + n.longValue();
-            else if (sum instanceof Float)
+            } else if (sum instanceof Float) {
                 sum = (Float) sum + n.floatValue();
-            else if (sum instanceof Double)
+            } else if (sum instanceof Double) {
                 sum = (Double) sum + n.doubleValue();
+            }
         }
 
         return (T) sum;
     }
 
     /**
-     *  Метод ыполняет поочередное деление всех хранящихся в объекте
-     *  элементов на делитель, переданны в качестве аргумента.
+     * Метод ыполняет поочередное деление всех хранящихся в объекте
+     * элементов на делитель, переданны в качестве аргумента.
+     *
      * @param s - делитель
      * @return Коллекция, содержащая результат деления элементов
      * исходной коллекции на делитель.
      */
-    public List<T> splitter(int s) {
-        List<T> res = new LinkedList<T>();
+    List<T> splitter(int s) {
+        List<T> res = new LinkedList<>();
         for (Object e : set) {
             if (e instanceof Byte) {
                 Byte a = (byte) ((Byte) e / s);
@@ -91,16 +98,20 @@ public class MathBox<T extends Number> extends ObjectBox {
      * Метод, добавляющий объект в коллекцию.
      * Объект д.б. наследником типа {@code Number}.
      * При несоответствии типов возникает исключение {@code ClassCastException}
+     *
      * @param obj - добавляемый объект.
      */
     @Override
-    public void addObject(Object obj) {
+    void addObject(Object obj) {
         if (obj instanceof Number) {
-            if(set.contains(obj))
+            if (set.contains(obj)) {
                 return;
+            }
             set.add(obj);
-        } else
+        } else {
+            System.out.println("Попытка добавить объект не соответствующий типу Number");
             throw new ClassCastException();
+        }
     }
 
     @Override

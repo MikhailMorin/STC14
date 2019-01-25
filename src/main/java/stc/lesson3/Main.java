@@ -1,33 +1,33 @@
 package stc.lesson3;
 
 /**
- * Класс содержит вызов статического метода утилитного класса {@code MergeSorter#merge(Integer[] arr_1, Integer[] arr_2)}
- * для выполнения сортировки переданного в качестве аргумента массива
+ * Класс осуществляет тестирование {@code MathBox<>}.
+ * Тестируемые методы {@code MathBox#toString()}, {@code MathBox#summator()} {@code MathBox#splitter(int s)}.
  *
  * @author Михаил Морин
  */
 public class Main {
     public static void main(String[] args) {
-        Integer[] arr = {1, 2, 4, 5, 2, 67, 2};
-        MathBox mb = new MathBox(arr);
-        System.out.println(mb);
-        System.out.println(mb.summator());
-        System.out.println(mb.splitter(3));
+        Integer[] arrInt = {1, 2, 4, 5, 2, 67, 2};
+        MathBox<Integer> mbInt = new MathBox<>(arrInt);
+        System.out.println(mbInt);
+        System.out.println(mbInt.summator());
+        System.out.println(mbInt.splitter(3));
         System.out.println();
 
-        Byte[] arr1 = {1, 2, 4, 5, 2, 67, 2,};
-        MathBox mb1 = new MathBox(arr1);
-        System.out.println(mb1);
-        System.out.println(mb1.summator());
-        System.out.println(mb1.splitter(3));
+        Byte[] arrByte = {1, 2, 4, 5, 2, 67, 2,};
+        MathBox<Byte> mbByte = new MathBox<>(arrByte);
+        System.out.println(mbByte);
+        System.out.println(mbByte.summator());
+        System.out.println(mbByte.splitter(2));
         System.out.println();
 
-        Double[] arr2 = {1.0, 2.0, 4.0, 5.0, 2.0, 67.0, 2.1};
-        MathBox mb2 = new MathBox(arr2);
-        System.out.println(mb2);
-        System.out.println(mb2.summator());
-        System.out.println(mb2.splitter(2));
+        Double[] arrDouble = {1.0, 2.0, 4.0, 5.0, 2.0, 67.0, 2.1};
+        MathBox<Double> mbDouble = new MathBox<>(arrDouble);
+        System.out.println(mbDouble);
+        System.out.println(mbDouble.summator());
+        System.out.println(mbDouble.splitter(4));
         System.out.println();
-
     }
+
 }

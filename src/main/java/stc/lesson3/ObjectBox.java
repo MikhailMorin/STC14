@@ -7,14 +7,14 @@ import java.util.*;
  * Данные кранятся в виде коллекции {@code TreeSet}
  * Имеются методы, позволяющие добавлять и удалять данные из хранилища.
  */
-public class ObjectBox {
+class ObjectBox {
     protected Set<Object> set = new TreeSet<>();
 
     /**
      * Метод, добавляющий объект в коллекцию.
      * @param obj - добавляемый элемент.
      */
-    public void addObject(Object obj) {
+    void addObject(Object obj) {
         set.add(obj);
     }
 
@@ -24,7 +24,7 @@ public class ObjectBox {
      * @return результат удаления
      * (true - элемент найден и удален, false - элемент отсутствует в коллекции).
      */
-    public boolean removeIfContains(Object i) {
+    boolean removeIfContains(Object i) {
         return set.remove(i);
     }
 
