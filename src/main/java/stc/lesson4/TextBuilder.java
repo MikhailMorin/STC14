@@ -1,22 +1,30 @@
 package stc.lesson4;
 
 
+import java.util.Random;
+
 /**
  * Класс для генерации и получения текста.
+ *
  * @author Михаил Морин
  */
-public class TextBuilder {
+class TextBuilder {
+    private static final int MAX_SENTENCE_SIZE = 15;
+    private static final int MAX_PARAGRAPH_SIZE = 20;
+    private static final double CHAR_SIZE_IN_KBYTES = 2.0 / 1024;
+
     private StringBuilder text = new StringBuilder();
     private String[] words;
     private int size;
     private int probability;
+    private Random randomize;
 
     /**
      * Метод для получения сгенерированного текста
      *
      * @return сгенерированный текст
      */
-    public String getText() {
+    String getText() {
         return text.toString();
     }
 
@@ -27,8 +35,13 @@ public class TextBuilder {
      * @param size        - размер файлов
      * @param probability - вероятность вхождения слова в следующее предложение
      */
-    public TextBuilder(String[] words, int size, int probability) {
+    TextBuilder(String[] words, int size, int probability) {
         setParams(words, size, probability);
+        randomize = new Random();
+    }
+
+    TextBuilder() {
+        randomize = new Random();
     }
 
     /**
@@ -38,21 +51,25 @@ public class TextBuilder {
      * @param size        - размер файлов
      * @param probability - вероятность вхождения слова в следующее предложение
      */
-    public void setParams(String[] words, int size, int probability) {
+    void setParams(String[] words, int size, int probability) {
         this.words = words;
         this.size = size;
         this.probability = probability;
     }
 
+    void clearBuffer() {
+        text.delete(0, text.length());
+    }
+
     /**
      * Метод, осуществляющий генерацию текста файла
      */
-    public void makeText() {
-        text.delete(0, text.length());
+    void makeText() {
+        clearBuffer();
 
         while (true) {
-            text.append(makeParagraph((size - text.length() * 2 / 1024)).toString());
-            if (text.length() * 2 / 1024 >= size) {
+            text.append(makeParagraph((size - (int) (text.length() * CHAR_SIZE_IN_KBYTES))).toString());
+            if (text.length() * CHAR_SIZE_IN_KBYTES >= size) {
                 break;
             }
         }
@@ -65,15 +82,18 @@ public class TextBuilder {
      * @return - сгенерированный параграф
      */
     private StringBuilder makeParagraph(int paragraphSize) {
-        int numOfWordGroups = (int) (Math.random() * 20) + 1; // Количество предложений в абзаце
+        randomize = new Random();
+
+        int numOfWordGroups = randomize.nextInt(MAX_PARAGRAPH_SIZE + 1); // Количество предложений в абзаце
 
         StringBuilder paragraph = new StringBuilder();
         paragraph.append("\t");
         for (int i = 0; i < numOfWordGroups; i++) {
             paragraph.append(makeSentence());
 
-            if ((paragraph.length() * 2) / 1024 >= paragraphSize)
+            if (paragraph.length() * CHAR_SIZE_IN_KBYTES >= paragraphSize) {
                 break;
+            }
         }
         paragraph.append("\r\n");
         return paragraph;
@@ -85,25 +105,40 @@ public class TextBuilder {
      * @return - сгенерированное предложение.
      */
     private StringBuilder makeSentence() {
+        randomize = new Random();
+
         char[] eosArr = {'.', '!', '?'};
         StringBuilder sentence = new StringBuilder();
-        int numOfWords = (int) (Math.random() * 15) + 1; // Количество слов в предложении
+        int numOfWords = randomize.nextInt(MAX_SENTENCE_SIZE + 1); // Количество слов в предложении
 
         int i = 0;
         while (true) {
-            String word = words[(int) (Math.random() * words.length)]; // Индекс слова из массива
-            if (Math.random() < 1.0 / probability) {
-                if (i == 0)
-                    word = word.substring(0, 1).toUpperCase() + word.substring(1);
+            String word = words[randomize.nextInt(words.length)]; // Индекс слова из массива
+            if (randomize.nextInt(100) < probability) {
+                if (i == 0) {
+                    word = toCapitalLetter(word);
+                }
                 sentence.append(word + " ");
 
-                if (++i >= numOfWords)
+                if (++i >= numOfWords) {
                     break;
+                }
             }
         }
         sentence.deleteCharAt(sentence.length() - 1);
-        char eos = eosArr[(int) (Math.random() * 3)];
+        char eos = eosArr[randomize.nextInt(3)];
         sentence.append(eos + " ");
         return sentence;
     }
+
+    /**
+     * ПРиведение слова к заглавной букве
+     *
+     * @param word - исходное слово
+     * @return - слово с заглавной буквы
+     */
+    private String toCapitalLetter(String word) {
+        return word.substring(0, 1).toUpperCase() + word.substring(1);
+    }
+
 }
