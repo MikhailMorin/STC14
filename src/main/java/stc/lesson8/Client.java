@@ -4,7 +4,11 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client {
+/**
+ * Поток клиента. Осуществляет подключение, создание потока для приёма входящих сообщений,
+ * а также отправку сообщений серверной части.
+ */
+class Client {
     public static void main(String[] args) throws IOException {
         try (Socket s = new Socket("127.0.0.1", Main.SERVER_PORT);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
@@ -24,8 +28,9 @@ public class Client {
                 bw.write(msg);
                 bw.newLine();
                 bw.flush();
-                if("quit".equals(msg))
+                if("quit".equals(msg)) {
                     break;
+                }
             }
         }
     }

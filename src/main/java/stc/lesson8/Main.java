@@ -5,9 +5,13 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Main {
-    public static final int SERVER_PORT = 3845;
-    public static final Map<String, Server> serverMap = new ConcurrentHashMap<>();
+/**
+ * Поток ожидания клиентских подключений с последующим созданием
+ * отдельных потоков для работы с подключенными клиентами.
+ */
+class Main {
+    static final int SERVER_PORT = 3845;
+    static final Map<Server, String> serverMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
         while (true) {
@@ -19,6 +23,7 @@ public class Main {
                     server.start();
                 }
             } catch (IOException e) {
+                System.out.println("Ошибка listener'а серверной части");
                 e.printStackTrace();
             }
         }
