@@ -1,15 +1,22 @@
 package stc.lesson6;
 
-import java.io.IOException;
-
 public class Main {
+    public static void main(String[] args) {
+        final String OBJECT_STORAGE = "./target/out/";
 
-    public static void main(String[] args) throws IOException {
         TestClass tc = new TestClass(1, 2, 3d, (byte) 4, "HELLO");
+        try {
+            Serializer.serialize(tc, OBJECT_STORAGE);
 
-        Serializer.serialize(tc, "C:\\Users\\Mikhail\\Desktop\\path\\serialize.txt");
-        TestClass tc1 = (TestClass) Serializer.deSerialize("C:\\Users\\Mikhail\\Desktop\\path\\serialize.txt");
+            TestClass tc1 = (TestClass) Serializer.deSerialize(OBJECT_STORAGE + TestClass.class.getSimpleName() + ".txt");
+            System.out.println(tc1.getL() + " " +
+                    tc1.getI() + " " +
+                    tc1.getD() + " " +
+                    tc1.getB() + " " +
+                    tc1.getS());
 
-        System.out.println(tc.getL() + " " + tc.getI() + " " + tc.getD() + " " + tc.getB() + " " + tc.getS());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
