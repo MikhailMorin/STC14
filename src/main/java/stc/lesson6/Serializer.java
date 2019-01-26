@@ -16,37 +16,6 @@ class Serializer {
     private static final int TYPE_TAG_LENGTH = 6;
 
     /**
-     * Формирование XML представления объекта.
-     * Заголовок: в качестве параметра тега - тип объекта.
-     * Поля: Формирование строковых представлений параметров (имя, тип, значение).
-     *
-     * @param o - сериализуемый объект.
-     * @return - представление объекта в XML формате.
-     * @throws IllegalAccessException
-     */
-    private static String makeXMLFormat(Object o) throws IllegalAccessException {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("<Object name=\"").
-           append(o.getClass().getName()).
-           append("\">\n");
-
-        for (Field f : o.getClass().getDeclaredFields()) {
-            f.setAccessible(true);
-            sb.append("<field name=\"").
-               append(f.getName()).
-               append("\" type=\"").
-               append(f.getType().getName()).
-               append("\">");
-            sb.append(f.get(o));
-            sb.append("</field>\r\n");
-        }
-
-        sb.append("</Object>");
-        return sb.toString();
-    }
-
-    /**
      * Метод, осуществляющий сериализацию переданного в качестве
      * аргумента объекта с записью в указанный файл в формате XML.
      *
@@ -113,6 +82,37 @@ class Serializer {
         }
 
         return o;
+    }
+
+    /**
+     * Формирование XML представления объекта.
+     * Заголовок: в качестве параметра тега - тип объекта.
+     * Поля: Формирование строковых представлений параметров (имя, тип, значение).
+     *
+     * @param o - сериализуемый объект.
+     * @return - представление объекта в XML формате.
+     * @throws IllegalAccessException
+     */
+    private static String makeXMLFormat(Object o) throws IllegalAccessException {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("<Object name=\"").
+                append(o.getClass().getName()).
+                append("\">\n");
+
+        for (Field f : o.getClass().getDeclaredFields()) {
+            f.setAccessible(true);
+            sb.append("<field name=\"").
+                    append(f.getName()).
+                    append("\" type=\"").
+                    append(f.getType().getName()).
+                    append("\">");
+            sb.append(f.get(o));
+            sb.append("</field>\r\n");
+        }
+
+        sb.append("</Object>");
+        return sb.toString();
     }
 
     /**

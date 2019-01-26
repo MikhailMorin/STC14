@@ -6,13 +6,18 @@ import java.nio.file.*;
 /**
  * Собственный загрузчик классов.
  */
-public class MyClassLoader extends ClassLoader {
+class MyClassLoader extends ClassLoader {
+    String dir;
+    public MyClassLoader(String dir) {
+        this.dir = dir;
+    }
+
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         if("SomeClass".equals(name)){
-            byte[] data;
             try {
-                data = Files.readAllBytes(Paths.get(Main.DIR_OUT + "SomeClass.class"));
+                byte[] data;
+                data = Files.readAllBytes(Paths.get(dir + "SomeClass.class"));
                 return defineClass(name, data, 0, data.length);
             } catch (IOException e) {
                 e.printStackTrace();
