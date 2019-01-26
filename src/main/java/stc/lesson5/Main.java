@@ -24,10 +24,7 @@ public class Main {
         Set<String> wordsSet = new HashSet<>(Arrays.asList(words));
 
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(res)));) {
-            for (String r : resources) {
-                Runnable resThread = new DataParser(bw, r, wordsSet);
-                threadPool.submit(resThread);
-            }
+            Arrays.stream(resources).map(r -> new DataParser(bw, r, wordsSet)).forEach(threadPool::submit);
 
             threadPool.shutdown();
             threadPool.awaitTermination(3600, TimeUnit.SECONDS);

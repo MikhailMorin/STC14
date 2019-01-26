@@ -100,6 +100,7 @@ class DataParser extends Thread {
     private String[] findMatches(Pattern pattern, String content) {
         List<String> matches = new LinkedList<>();
         Matcher matcher = pattern.matcher(content);
+
         while (matcher.find()) {
             matches.add(matcher.group(0));
         }
@@ -118,6 +119,7 @@ class DataParser extends Thread {
                 return true;
             }
         }
+
         return false;
     }
 
