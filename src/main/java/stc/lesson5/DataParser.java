@@ -12,9 +12,8 @@ import java.util.regex.*;
  * требуемых слов.
  */
 class DataParser extends Thread {
-    enum SourceType {WEB, FTP, FILE, UNKNOWN}
+    private enum SourceType {WEB, FTP, FILE, UNKNOWN};
 
-    ;
     private SourceType sourceType;
     private String source;
 
