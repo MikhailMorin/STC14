@@ -25,7 +25,7 @@ class Serializer {
     static void serialize(Object o, String path) throws IllegalAccessException, IOException {
 
         Files.createDirectories(Paths.get(path));
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path + o.getClass().getSimpleName() + ".txt"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path + o.getClass().getSimpleName() + ".xml"))) {
             String XMLObject = makeXMLFormat(o);
             bw.write(XMLObject);
         } catch (IllegalAccessException e) {

@@ -8,7 +8,7 @@ public class Main {
         try {
             Serializer.serialize(tc, OBJECT_STORAGE);
 
-            TestClass tc1 = (TestClass) Serializer.deSerialize(OBJECT_STORAGE + TestClass.class.getSimpleName() + ".txt");
+            TestClass tc1 = (TestClass) Serializer.deSerialize(OBJECT_STORAGE + TestClass.class.getSimpleName() + ".xml");
             System.out.println(tc1.getL() + " " +
                     tc1.getI() + " " +
                     tc1.getD() + " " +
@@ -16,6 +16,7 @@ public class Main {
                     tc1.getS());
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
     }
