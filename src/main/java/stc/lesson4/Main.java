@@ -43,8 +43,7 @@ public class Main {
 
                 try (FileWriter file = new FileWriter(f);
                      BufferedWriter bw = new BufferedWriter(file);) {
-                    TextBuilder tb = new TextBuilder();
-                    tb.setParams(words, size, probability);
+                    TextBuilder tb = new TextBuilder(words, size, probability);
                     tb.makeText();
                     bw.write(tb.getText());
                 } catch (IOException e) {

@@ -13,11 +13,11 @@ class TextBuilder {
     private static final int MAX_PARAGRAPH_SIZE = 20;
     private static final double CHAR_SIZE_IN_KBYTES = 2.0 / 1024;
 
-    private StringBuilder text = new StringBuilder();
-    private String[] words;
-    private int size;
-    private int probability;
-    private Random randomize;
+    private final StringBuilder text = new StringBuilder();
+    private final String[] words;
+    private final int size;
+    private final int probability;
+    private final Random randomize;
 
     /**
      * Метод для получения сгенерированного текста
@@ -36,25 +36,10 @@ class TextBuilder {
      * @param probability - вероятность вхождения слова в следующее предложение
      */
     TextBuilder(String[] words, int size, int probability) {
-        setParams(words, size, probability);
-        randomize = new Random();
-    }
-
-    TextBuilder() {
-        randomize = new Random();
-    }
-
-    /**
-     * Метод, позволяющий изменить параметры генерации
-     *
-     * @param words       - словарь
-     * @param size        - размер файлов
-     * @param probability - вероятность вхождения слова в следующее предложение
-     */
-    void setParams(String[] words, int size, int probability) {
         this.words = words;
         this.size = size;
         this.probability = probability;
+        randomize = new Random();
     }
 
     void clearBuffer() {
@@ -82,8 +67,6 @@ class TextBuilder {
      * @return - сгенерированный параграф
      */
     private StringBuilder makeParagraph(int paragraphSize) {
-        randomize = new Random();
-
         int numOfWordGroups = randomize.nextInt(MAX_PARAGRAPH_SIZE + 1); // Количество предложений в абзаце
 
         StringBuilder paragraph = new StringBuilder();
@@ -105,8 +88,6 @@ class TextBuilder {
      * @return - сгенерированное предложение.
      */
     private StringBuilder makeSentence() {
-        randomize = new Random();
-
         char[] eosArr = {'.', '!', '?'};
         StringBuilder sentence = new StringBuilder();
         int numOfWords = randomize.nextInt(MAX_SENTENCE_SIZE + 1); // Количество слов в предложении
