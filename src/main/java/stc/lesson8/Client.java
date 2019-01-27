@@ -9,8 +9,10 @@ import java.util.Scanner;
  * а также отправку сообщений серверной части.
  */
 class Client {
+    static final String SERVER_IP = "127.0.0.1";
+    static final int SERVER_PORT = 3845;
     public static void main(String[] args) throws IOException {
-        try (Socket s = new Socket("127.0.0.1", Main.SERVER_PORT);
+        try (Socket s = new Socket(SERVER_IP, SERVER_PORT);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
              Scanner sc = new Scanner(System.in);) {
 
