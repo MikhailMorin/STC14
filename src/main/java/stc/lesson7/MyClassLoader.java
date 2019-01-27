@@ -7,11 +7,21 @@ import java.nio.file.*;
  * Собственный загрузчик классов.
  */
 class MyClassLoader extends ClassLoader {
+    // Директория хранения *.java и *.class файлов.
     String dir;
+
     public MyClassLoader(String dir) {
         this.dir = dir;
     }
 
+    /**
+     * Загрузка класса по указанному имени. В случае, если имя - SomeClass,
+     * осуществляется загрузка класса из директории {@code MyClassLoader#dir}.
+     * В противном случае загрузка делегируется родительскому классу.
+     * @param name - имя загружаемого класса.
+     * @return - найденый класс.
+     * @throws ClassNotFoundException
+     */
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         if("SomeClass".equals(name)){
