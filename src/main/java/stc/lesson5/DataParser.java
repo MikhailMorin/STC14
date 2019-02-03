@@ -12,10 +12,10 @@ import java.util.regex.*;
  * требуемых слов.
  */
 class DataParser extends Thread {
-    private enum SourceType {WEB, FTP, FILE, UNKNOWN};
+    private enum SourceType {HTTP, FTP, FILE, UNKNOWN};
 
-    private SourceType sourceType;
-    private String source;
+    private SourceType sourceType = SourceType.UNKNOWN;
+    private String sourcePath;
 
     private final String UNCOMPLETED_SENTENCE = "[A-ZА-Я][^!?.]+$"; // Неоконченное предложение
     private final String ENDOF_SENTENCE = "^[^A-ZА-Я!?.]+[!?.]";    // Конец предложение
@@ -32,13 +32,14 @@ class DataParser extends Thread {
     /**
      * Конструктор, принимающий в качестве параметров исходные данные для разбора.
      *
-     * @param source   - источник данных.
+     * @param outRes  - поток для записи результатов работы.
+     * @param sourcePath   - источник данных.
      * @param wordList - список искомых слов.
      */
-    DataParser(BufferedWriter fw, String source, Set<String> wordList) {
-        this.output = fw;
-        this.source = source;
-        this.sourceType = getSourceType(source);
+    DataParser(BufferedWriter outRes, String sourcePath, Set<String> wordList) {
+        this.output = outRes;
+        this.sourcePath = sourcePath;
+        this.sourceType = getSourceType(sourcePath);
         this.wordList = wordList;
         uncompletedSentencePattern = Pattern.compile(UNCOMPLETED_SENTENCE);
         endofSentencePattern = Pattern.compile(ENDOF_SENTENCE);
@@ -52,11 +53,15 @@ class DataParser extends Thread {
      * @return тип ресурса в формате {@code SourceType}
      */
     private SourceType getSourceType(String source) {
-        if (source.matches("^(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w.-]*)*/?$")) {
-            return SourceType.WEB;
-        } else if (source.matches("^(ftps?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w.-]*)*/?$")) {
+        String scheme = URI.create(source).getScheme();
+        if(scheme == null)
+            return SourceType.UNKNOWN;
+
+        if (scheme.contains("http")) {
+            return SourceType.HTTP;
+        } else if (scheme.contains("ftps")) {
             return SourceType.FTP;
-        } else if (source.matches("^(.*/)([^/]+?)(\\.[^.]+)?$")) {
+        } else if (scheme.contains("file")) {
             return SourceType.FILE;
         } else {
             return SourceType.UNKNOWN;
@@ -72,15 +77,15 @@ class DataParser extends Thread {
     private BufferedReader openResource() throws IOException {
         switch (sourceType) {
             case FTP: {
-                URL url = new URL(source);
+                URL url = new URL(sourcePath);
                 URLConnection urlc = url.openConnection();
                 return new BufferedReader(new InputStreamReader(urlc.getInputStream()));
             }
-            case WEB: {
-                return new BufferedReader(new StringReader(Jsoup.connect(source).get().text()));
+            case HTTP: {
+                return new BufferedReader(new StringReader(Jsoup.connect(sourcePath).get().text()));
             }
             case FILE: {
-                return new BufferedReader(new InputStreamReader(new FileInputStream(source)));
+                return new BufferedReader(new InputStreamReader(new FileInputStream(sourcePath)));
             }
             case UNKNOWN:
             default: {
@@ -113,8 +118,8 @@ class DataParser extends Thread {
      * @return - найдено-ли совпадение (true/false)
      */
     private boolean isContains(String sentence) {
-        for (String s : wordList) {
-            if (sentence.contains(s)) {
+        for (String word : wordList) {
+            if (sentence.contains(word)) {
                 return true;
             }
         }
@@ -178,15 +183,15 @@ class DataParser extends Thread {
      * @throws IOException - в случае ошибки при работе с входным или выходным потоком
      */
     private void parse() throws IOException {
-        long startTime = System.nanoTime();
-        try (BufferedReader r = this.openResource()) {
+        long startTime = System.currentTimeMillis();
+        try (BufferedReader streamSource = this.openResource()) {
             String line;
-            while ((line = r.readLine()) != null) {
+            while ((line = streamSource.readLine()) != null) {
                 checkLine(line);
             }
         }
-        long fullTime = System.nanoTime() - startTime;
-        System.out.println(this + ": " + source + ",  Время: " + fullTime / 1_000_000 + " мс.");
+        long fullTime = System.currentTimeMillis() - startTime;
+        System.out.println(String.format("%s: %s,  Время: %d мс.", this, sourcePath, fullTime));
     }
 
     @Override
