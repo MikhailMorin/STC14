@@ -38,7 +38,7 @@ public class Main {
      */
     static void delayForProfilerStart(){
         System.out.println("press Enter key to start");
-        new Scanner(System.in).next();
+        new Scanner(System.in).nextLine();
         System.out.println("GO!");
     }
 }
