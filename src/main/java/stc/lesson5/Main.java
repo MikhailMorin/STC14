@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class Main {
-    static final String INPUT_DIR = "file:///../src/main/resources/";
-    static final String OUTPUT_DIR = "./target/out/";
+    static final private String INPUT_DIR = "file:///../src/main/resources/";
+    static final private String OUTPUT_DIR = "./target/out/";
 
     public static void main(String[] args) throws IOException {
         final String[] words = {"Petersburg", "программист", "приложения"};

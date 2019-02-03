@@ -14,15 +14,11 @@ import java.util.regex.*;
 class DataParser extends Thread {
     private enum SourceType {HTTP, FTP, FILE, UNKNOWN};
 
-    private SourceType sourceType = SourceType.UNKNOWN;
+    private SourceType sourceType;
     private String sourcePath;
 
-    private final String UNCOMPLETED_SENTENCE = "[A-ZА-Я][^!?.]+$"; // Неоконченное предложение
-    private final String ENDOF_SENTENCE = "^[^A-ZА-Я!?.]+[!?.]";    // Конец предложение
-    private final String FULL_SENTENCE = "[A-ZА-Я][^!?.]+[!?.]";    // Целое предложение
-
     private final Pattern uncompletedSentencePattern;
-    private final Pattern endofSentencePattern;
+    private final Pattern endOfSentencePattern;
     private final Pattern fullSentencePattern;
     private String unfinishedSentence = "";
 
@@ -41,9 +37,13 @@ class DataParser extends Thread {
         this.sourcePath = sourcePath;
         this.sourceType = getSourceType(sourcePath);
         this.wordList = wordList;
-        uncompletedSentencePattern = Pattern.compile(UNCOMPLETED_SENTENCE);
-        endofSentencePattern = Pattern.compile(ENDOF_SENTENCE);
-        fullSentencePattern = Pattern.compile(FULL_SENTENCE, Pattern.MULTILINE);
+
+        // Неоконченное предложение
+        uncompletedSentencePattern = Pattern.compile("[A-ZА-Я][^!?.]+$");
+        // Конец предложение
+        endOfSentencePattern = Pattern.compile("^[^A-ZА-Я!?.]+[!?.]");
+        // Целое предложение
+        fullSentencePattern = Pattern.compile("[A-ZА-Я][^!?.]+[!?.]", Pattern.MULTILINE);
     }
 
     /**
@@ -138,7 +138,7 @@ class DataParser extends Thread {
         Если есть незавершенная строка, ищем завершение во вновь считанной.
          */
         if (!unfinishedSentence.equals("")) {
-            String[] endOfStcs = findMatches(endofSentencePattern, line);
+            String[] endOfStcs = findMatches(endOfSentencePattern, line);
             if (endOfStcs.length == 0) { // если конец предложения не найден, выход для чтения следующей строки
                 unfinishedSentence += line;
                 return;
