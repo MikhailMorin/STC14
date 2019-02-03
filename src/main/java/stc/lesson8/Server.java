@@ -8,14 +8,14 @@ import java.util.Map;
  * Серверный поток для поддержания соединения с клиентским потоком.
  */
 public class Server extends Thread {
-    private BufferedWriter bw;
-    private BufferedReader br;
-    private Socket s;
+    private final BufferedWriter msgWriter;
+    private final BufferedReader msgReader;
+    private final Socket socket;
 
-    Server(Socket s) throws IOException {
-        this.bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-        this.br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        this.s = s;
+    Server(Socket socket) throws IOException {
+        this.msgWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        this.msgReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.socket = socket;
     }
 
     /**
@@ -24,11 +24,11 @@ public class Server extends Thread {
      * @throws IOException
      */
     private void sendAll(String msg) throws IOException {
-        for (Map.Entry<Server, String> e : Main.serverMap.entrySet()) {
-            Server s = e.getKey();
-            s.bw.write(msg);
-            s.bw.newLine();
-            s.bw.flush();
+        for (Map.Entry<Server, String> entry : Main.serverMap.entrySet()) {
+            Server server = entry.getKey();
+            server.msgWriter.write(msg);
+            server.msgWriter.newLine();
+            server.msgWriter.flush();
         }
     }
 
@@ -37,33 +37,35 @@ public class Server extends Thread {
      */
     @Override
     public void run() {
-        String name = "";
+        String username = "";
         try {
-            name = br.readLine();
+            username = msgReader.readLine();
 
-            System.out.println(name + " подключился к чату");
-            sendAll(name + " подключился к чату");
-            Main.serverMap.put(this, name);
+            System.out.println(username + " подключился к чату");
+            sendAll(username + " подключился к чату");
+            Main.serverMap.put(this, username);
 
             String msg;
-            while (!"quit".equals(msg = br.readLine())) {
-                System.out.println(name + ": " + msg );
-                sendAll(name + ": " + msg);
+            while (!"quit".equals(msg = msgReader.readLine())) {
+                System.out.println(username + ": " + msg );
+                sendAll(username + ": " + msg);
             }
 
-            Main.serverMap.remove(this, name);
-            System.out.println("Участник " + name + " покинул чат.");
-            sendAll("Участник " + name + " покинул чат.");
-        } catch (IOException e) {
-            Main.serverMap.remove(this, name);
-            e.printStackTrace();
+            Main.serverMap.remove(this, username);
+            System.out.println("Участник " + username + " покинул чат.");
+            sendAll("Участник " + username + " покинул чат.");
+        } catch (IOException ex) {
+            Main.serverMap.remove(this, username);
+            System.out.println("Ошибка ввода/вывода во время ожидания подключений");
+            ex.printStackTrace();
         } finally {
             try {
-                bw.close();
-                br.close();
-                s.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                msgWriter.close();
+                msgReader.close();
+                socket.close();
+            } catch (IOException ex) {
+                System.out.println("Ошибка закрытия потоков");
+                ex.printStackTrace();
             }
         }
     }

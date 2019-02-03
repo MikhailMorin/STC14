@@ -8,19 +8,19 @@ import java.net.Socket;
  * Поток клиента для обработки входящих сообщений
  */
 class Listener extends Thread {
-    Socket socket;
+    private final Socket socket;
     Listener(Socket socket) {
         this.socket = socket;
     }
 
     @Override
     public void run() {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+        try (BufferedReader msgReceiver = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
             while (true) {
-                System.out.println(br.readLine());
+                System.out.println(msgReceiver.readLine());
             }
-        } catch (IOException e) {
-            System.out.println("Клиент stc.lesson8.Listener завершил работу");
+        } catch (IOException ex) {
+            System.out.println("Listener завершил работу");
         }
     }
 }
