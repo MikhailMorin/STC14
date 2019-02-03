@@ -8,7 +8,7 @@ import java.nio.file.*;
  */
 class MyClassLoader extends ClassLoader {
     // Директория хранения *.java и *.class файлов.
-    String dir;
+    final private String dir;
 
     public MyClassLoader(String dir) {
         this.dir = dir;

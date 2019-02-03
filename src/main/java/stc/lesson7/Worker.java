@@ -5,5 +5,5 @@ package stc.lesson7;
  * которого необходимо выполнить в режиме runtime.
  */
 public interface Worker {
-    public void doWork();
+    void doWork();
 }

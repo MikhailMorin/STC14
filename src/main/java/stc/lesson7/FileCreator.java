@@ -11,16 +11,13 @@ import java.nio.file.*;
 class FileCreator {
     /**
      * Генерация файла по данным, введенным с консоли.
-     * @return Название сгенерированного *.class файла
      * @throws IOException
      */
-    static String createFromCmd(String dir) throws IOException {
+    static void createFromCmd(String dir) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             String code = writeDoWork(reader);
             String filename = dir + "SomeClass.java";
             classGen(filename, code);
-
-            return filename;
         } catch (IOException e) {
             e.printStackTrace();
             throw new IOException("Ошибка ввода/вывода генерации класса", e);
@@ -42,9 +39,9 @@ class FileCreator {
                 append("\tpublic void doWork(){\n");
 
         while (true){
-            String s = reader.readLine();
-            code.append("\t\t").append(s);
-            if("".equals(s)) {
+            String codeLine = reader.readLine();
+            code.append("\t\t").append(codeLine);
+            if("".equals(codeLine)) {
                 code.append("\n");
                 break;
             }
@@ -62,7 +59,7 @@ class FileCreator {
      */
     private static void classGen(String filename, String code) throws IOException {
         // Сохраняем исходный код в файл
-        Files.write(Paths.get(filename), code.toString().getBytes());
+        Files.write(Paths.get(filename), code.getBytes());
         // Получаем компилятор
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         // Указываем имя .java файла

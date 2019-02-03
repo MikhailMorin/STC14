@@ -14,6 +14,6 @@ public class Main {
 
         MyClassLoader mcl = new MyClassLoader(DIR_OUT);
         Class clazz = mcl.loadClass("stc.lesson7.SomeClass");
-        clazz.getMethod("doWork").invoke(clazz.getConstructor().newInstance(), (Object[])null);
+        clazz.getMethod("doWork").invoke(clazz.getConstructor().newInstance(), (Object[]) null);
     }
 }
