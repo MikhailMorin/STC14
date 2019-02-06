@@ -1,0 +1,11 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  email:
+    recipients:
+      - morin.mihail@gmail.com
+    on_success: never
+    on_failure: always
