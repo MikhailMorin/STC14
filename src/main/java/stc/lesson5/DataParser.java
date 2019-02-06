@@ -1,9 +1,10 @@
 package stc.lesson5;
 
 import org.jsoup.Jsoup;
+import stc.lesson5.ResourceLoader.ResourceLoader;
+import stc.lesson5.ResourceLoader.ResourceLoaderImpl;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.util.regex.*;
 
@@ -11,87 +12,36 @@ import java.util.regex.*;
  * Класс, реализующий разбор исходного ресурса с целью поиска
  * требуемых слов.
  */
-class DataParser extends Thread {
-    private enum SourceType {HTTP, FTP, FILE, UNKNOWN};
-
-    private SourceType sourceType;
-    private String sourcePath;
-
+public class DataParser extends Thread {
     private final Pattern uncompletedSentencePattern;
     private final Pattern endOfSentencePattern;
     private final Pattern fullSentencePattern;
     private String unfinishedSentence = "";
 
     private Set<String> wordList;
-    final private BufferedWriter output;
+
+    private final BufferedWriter output;
+    private final BufferedReader input;
 
     /**
      * Конструктор, принимающий в качестве параметров исходные данные для разбора.
      *
-     * @param outRes  - поток для записи результатов работы.
-     * @param sourcePath   - источник данных.
-     * @param wordList - список искомых слов.
+     * @param outRes     - поток для записи результатов работы.
+     * @param inputSrc - поток для считывания данных.
+     * @param wordList   - список искомых слов.
      */
-    DataParser(BufferedWriter outRes, String sourcePath, Set<String> wordList) {
+    DataParser(BufferedWriter outRes, BufferedReader inputSrc, Set<String> wordList) {
         this.output = outRes;
-        this.sourcePath = sourcePath;
-        this.sourceType = getSourceType(sourcePath);
+        this.input = inputSrc;
         this.wordList = wordList;
 
         // Неоконченное предложение
         uncompletedSentencePattern = Pattern.compile("[A-ZА-Я][^!?.]+$");
         // Конец предложение
         endOfSentencePattern = Pattern.compile("^[^A-ZА-Я!?.]+[!?.]");
+//        endOfSentencePattern = Pattern.compile("^[^A-ZА-Я].+?[!?.]");
         // Целое предложение
         fullSentencePattern = Pattern.compile("[A-ZА-Я][^!?.]+[!?.]", Pattern.MULTILINE);
-    }
-
-    /**
-     * Определение типа ресурса по адресу ресурса.
-     *
-     * @param source - адрес ресурса
-     * @return тип ресурса в формате {@code SourceType}
-     */
-    private SourceType getSourceType(String source) {
-        String scheme = URI.create(source).getScheme();
-        if(scheme == null)
-            return SourceType.UNKNOWN;
-
-        if (scheme.contains("http")) {
-            return SourceType.HTTP;
-        } else if (scheme.contains("ftps")) {
-            return SourceType.FTP;
-        } else if (scheme.contains("file")) {
-            return SourceType.FILE;
-        } else {
-            return SourceType.UNKNOWN;
-        }
-    }
-
-    /**
-     * Создание потока для работы с ресурсом.
-     *
-     * @return созданый поток.
-     * @throws IOException - в случае ошибки при попытке создания входного потока
-     */
-    private BufferedReader openResource() throws IOException {
-        switch (sourceType) {
-            case FTP: {
-                URL url = new URL(sourcePath);
-                URLConnection urlc = url.openConnection();
-                return new BufferedReader(new InputStreamReader(urlc.getInputStream()));
-            }
-            case HTTP: {
-                return new BufferedReader(new StringReader(Jsoup.connect(sourcePath).get().text()));
-            }
-            case FILE: {
-                return new BufferedReader(new InputStreamReader(new FileInputStream(sourcePath)));
-            }
-            case UNKNOWN:
-            default: {
-                throw new IOException();
-            }
-        }
     }
 
     /**
@@ -117,14 +67,66 @@ class DataParser extends Thread {
      * @param sentence - предложение, в котором осуществляется поиск.
      * @return - найдено-ли совпадение (true/false)
      */
-    private boolean isContains(String sentence) {
+    boolean isContains(String sentence) {
         for (String word : wordList) {
             if (sentence.contains(word)) {
                 return true;
             }
         }
-
         return false;
+    }
+
+    /*
+        Ищем завершение предложения.
+    */
+    boolean checkFinish(String line) throws IOException {
+        String[] endOfStcs = findMatches(endOfSentencePattern, line);
+        if (endOfStcs.length == 0) {
+            unfinishedSentence += " " + line;
+            return false;
+        }
+
+        String continuation = endOfStcs[0];
+        String sentence = unfinishedSentence + " " + continuation;
+
+        if (isContains(sentence)) {
+            synchronized (output) {
+                sentence = sentence.replaceAll("[^a-zA-Zа-яА-Я\\d\\s.!?]", "");
+                output.write(sentence + "\n");
+            }
+        }
+        unfinishedSentence = "";
+        return true;
+    }
+
+    /*
+        Поиск целых предложений в строке.
+    */
+    int checkFinished(String line) throws IOException {
+        int numOfStcs = 0;
+        for (String matched : findMatches(fullSentencePattern, line)) {
+            if (isContains(matched)) {
+                synchronized (output) {
+                    matched = matched.replaceAll("[^a-zA-Zа-яА-Я\\d\\s.!?]", "");
+                    output.write(matched + "\n");
+                    numOfStcs++;
+                }
+            }
+        }
+        return numOfStcs;
+    }
+
+    /*
+        Поиск незавершенных предложений в строке.
+    */
+    boolean checkUnfinished(String line) {
+        boolean isChecked = false;
+        String[] end = findMatches(uncompletedSentencePattern, line);
+        if (end.length != 0) {
+            unfinishedSentence = end[0];
+            isChecked = true;
+        }
+        return isChecked;
     }
 
     /**
@@ -133,48 +135,14 @@ class DataParser extends Thread {
      * @param line - разбираемая строка
      * @throws IOException - в случае ошибки при работе с выходным потоком
      */
-    private void checkLine(String line) throws IOException {
-        /*
-        Если есть незавершенная строка, ищем завершение во вновь считанной.
-         */
+    void checkLine(String line) throws IOException {
         if (!unfinishedSentence.equals("")) {
-            String[] endOfStcs = findMatches(endOfSentencePattern, line);
-            if (endOfStcs.length == 0) { // если конец предложения не найден, выход для чтения следующей строки
-                unfinishedSentence += line;
+            if (!checkFinish(line)) {
                 return;
             }
-
-            String continuation = endOfStcs[0];
-            String sentence = unfinishedSentence + " " + continuation;
-
-            if (isContains(sentence)) {
-                synchronized (output) {
-                    sentence = sentence.replaceAll("[^a-zA-Zа-яА-Я\\d\\s]", "");
-                    output.write(sentence + "\n");
-                }
-            }
-            unfinishedSentence = "";
         }
-
-        /*
-        Поиск целых предложений в строке.
-         */
-        for (String matched : findMatches(fullSentencePattern, line)) {
-            if (isContains(matched)) {
-                synchronized (output) {
-                    matched = matched.replaceAll("[^a-zA-Zа-яА-Я\\d\\s]", "");
-                    output.write(matched + "\n");
-                }
-            }
-        }
-
-        /*
-        Поиск незавершенных предложений в строке.
-         */
-        String[] end = findMatches(uncompletedSentencePattern, line);
-        if (end.length != 0) {
-            unfinishedSentence = end[0];
-        }
+        checkFinished(line);
+        checkUnfinished(line);
     }
 
     /**
@@ -182,25 +150,25 @@ class DataParser extends Thread {
      *
      * @throws IOException - в случае ошибки при работе с входным или выходным потоком
      */
-    private void parse() throws IOException {
+    void parseFrom() throws IOException {
         long startTime = System.currentTimeMillis();
-        try (BufferedReader streamSource = this.openResource()) {
-            String line;
-            while ((line = streamSource.readLine()) != null) {
-                checkLine(line);
-            }
+
+        String line;
+        while ((line = input.readLine()) != null) {
+             checkLine(line);
         }
+
         long fullTime = System.currentTimeMillis() - startTime;
-        System.out.println(String.format("%s: %s,  Время: %d мс.", this, sourcePath, fullTime));
+        System.out.println(String.format("%s,  время %d мс.", this, fullTime));
     }
 
     @Override
     public void run() {
         try {
             System.out.println("ЗАПУСК " + this);
-            parse();
+            parseFrom();
         } catch (IOException e) {
-            System.out.println("Ошибка при работе с ресурсами в " + this);
+            System.err.printf("Ошибка при работе с ресурсами в %s", this);
             e.printStackTrace();
         }
     }

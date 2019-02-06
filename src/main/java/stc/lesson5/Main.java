@@ -1,5 +1,7 @@
 package stc.lesson5;
 
+import stc.lesson5.ResourceLoader.ResourceLoaderImpl;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -7,11 +9,11 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class Main {
-    static final private String INPUT_DIR = "file:///../src/main/resources/";
-    static final private String OUTPUT_DIR = "./target/out/";
+    private static final String INPUT_DIR = "./src/main/resources/";
+    private static final String OUTPUT_DIR = "./target/out/";
 
     public static void main(String[] args) throws IOException {
-        final String[] words = {"Petersburg", "программист", "приложения"};
+        final String[] words = {"yourself", "программист", "приложения"};
         final String[] resources = {INPUT_DIR + "warpeace.txt",
                                           "https://habr.com/ru/post/321344/",
                                           "https://habr.com/ru/company/tm/blog/435562/"};
@@ -20,17 +22,33 @@ public class Main {
         getOccurencies(resources, words, OUTPUT_DIR + "file.txt");
     }
 
-    private static void getOccurencies(String[] resources, String[] words, String res) {
+    private static void getOccurencies(String[] resources, String[] words, String res) throws IOException {
         ExecutorService threadPool = Executors.newFixedThreadPool(3);
 
         Set<String> wordsSet = new HashSet<>(Arrays.asList(words));
+        List<BufferedReader> readers = new ArrayList<>();
+
+        for (String s : resources) {
+            readers.add(new ResourceLoaderImpl(s).openResource());
+        }
 
         try (BufferedWriter outRes = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(res)));) {
-            Arrays.stream(resources)
-                    .map(resource -> new DataParser(outRes, resource, wordsSet))
-                    .forEach(threadPool::submit);
+
+            for (BufferedReader inSrc : readers) {
+                threadPool.submit(new DataParser(outRes, inSrc, wordsSet));
+            }
+
             threadPool.shutdown();
             threadPool.awaitTermination(3600, TimeUnit.SECONDS);
+
+            readers.stream().forEach(reader -> {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
         } catch (FileNotFoundException e) {
             System.out.println("Файл " + res + " не найден");
             e.printStackTrace();
