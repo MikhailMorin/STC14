@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class PersonDAOImpl implements PersonDAO {private final Connection connection;
     private static final Logger LOGGER =
-            Logger.getLogger(PersonDAOImpl.class);
+            Logger.getLogger(PersonDAOImpl.class.getSimpleName());
 
 
     public PersonDAOImpl(Connection connection) {
@@ -43,7 +43,7 @@ public class PersonDAOImpl implements PersonDAO {private final Connection connec
             LOGGER.debug(String.format("Персона %s добавлена", person.getName()));
         }
         catch (SQLException ex){
-            LOGGER.error(String.format("Ошибка при добавлении в хранилище персоны %s", person.getName()));
+            LOGGER.error(String.format("Ошибка при добавлении в хранилище персоны %s", person.getName()), ex);
 
             ex.printStackTrace();
             throw ex;
@@ -68,7 +68,7 @@ public class PersonDAOImpl implements PersonDAO {private final Connection connec
             LOGGER.debug(String.format("Персона c id = %d изменена", person.getId()));
         }
         catch (SQLException ex){
-            LOGGER.error(String.format("Ошибка изменения в хранилище персоны с id = %s", person.getId()));
+            LOGGER.error(String.format("Ошибка изменения в хранилище персоны с id = %s", person.getId()), ex);
 
             ex.printStackTrace();
             throw ex;
@@ -91,7 +91,7 @@ public class PersonDAOImpl implements PersonDAO {private final Connection connec
             LOGGER.debug(String.format("Персона c id = %d удалена", person.getId()));
         }
         catch (SQLException ex){
-            LOGGER.error(String.format("Ошибка удаления из хранилища персоны с id = %s", person.getId()));
+            LOGGER.error(String.format("Ошибка удаления из хранилища персоны с id = %s", person.getId()), ex);
 
             ex.printStackTrace();
             throw ex;
@@ -113,7 +113,7 @@ public class PersonDAOImpl implements PersonDAO {private final Connection connec
             return createPersonsByResult(set);
         }
         catch (SQLException ex){
-            LOGGER.error("Ошибка при получении списка персон");
+            LOGGER.error("Ошибка при получении списка персон", ex);
 
             ex.printStackTrace();
             throw ex;
@@ -136,7 +136,7 @@ public class PersonDAOImpl implements PersonDAO {private final Connection connec
             return createPersonsByResult(set);
         }
         catch (SQLException ex){
-            LOGGER.error("Ошибка при получении списка персон для учебной дисциплины " + subject.getDescription());
+            LOGGER.error("Ошибка при получении списка персон для учебной дисциплины " + subject.getDescription(), ex);
 
             ex.printStackTrace();
             throw ex;

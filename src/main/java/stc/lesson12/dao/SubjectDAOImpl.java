@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class SubjectDAOImpl implements SubjectDAO {
     private static final Logger LOGGER =
-            Logger.getLogger(SubjectDAOImpl.class);
+            Logger.getLogger(SubjectDAOImpl.class.getSimpleName());
 
     private final Connection connection;
     public SubjectDAOImpl(Connection connection) {
@@ -41,7 +41,7 @@ public class SubjectDAOImpl implements SubjectDAO {
             LOGGER.debug(String.format("Учебная дисциплина %s добавлена", subject.getDescription()));
         }
         catch (SQLException ex){
-            LOGGER.error(String.format("Ошибка при добавлении в хранилище учебной дисциплины %s", subject.getDescription()));
+            LOGGER.error(String.format("Ошибка при добавлении в хранилище учебной дисциплины %s", subject.getDescription()), ex);
 
             ex.printStackTrace();
             throw ex;
@@ -65,8 +65,7 @@ public class SubjectDAOImpl implements SubjectDAO {
             LOGGER.debug(String.format("Учебная дисциплина c id = %d изменена", subject.getId()));
         }
         catch (SQLException ex){
-            LOGGER.error(String.format("Ошибка изменения в хранилище учебной дисциплины с id = %s", subject.getId()));
-
+            LOGGER.error(String.format("Ошибка изменения в хранилище учебной дисциплины с id = %s", subject.getId()), ex);
             ex.printStackTrace();
             throw ex;
         }
@@ -88,8 +87,7 @@ public class SubjectDAOImpl implements SubjectDAO {
             LOGGER.debug(String.format("Учебная дисциплина c id = %d удалена", subject.getId()));
         }
         catch (SQLException ex){
-            LOGGER.error(String.format("Ошибка удаления из хранилища учебной дисциплины с id = %s", subject.getId()));
-
+            LOGGER.error(String.format("Ошибка удаления из хранилища учебной дисциплины с id = %s", subject.getId()), ex);
             ex.printStackTrace();
             throw ex;
         }
@@ -110,8 +108,7 @@ public class SubjectDAOImpl implements SubjectDAO {
             return createSubjectsByResult(set);
         }
         catch (SQLException ex){
-            LOGGER.error("Ошибка при получении списка учебных дисциплин");
-
+            LOGGER.error("Ошибка при получении списка учебных дисциплин", ex);
             ex.printStackTrace();
             throw ex;
         }
@@ -133,7 +130,7 @@ public class SubjectDAOImpl implements SubjectDAO {
             return createSubjectsByResult(set);
         }
         catch (SQLException ex){
-            LOGGER.error("Ошибка при получении списка учебных дисциплин для персоны " + person.getName());
+            LOGGER.error("Ошибка при получении списка учебных дисциплин для персоны " + person.getName(), ex);
 
             ex.printStackTrace();
             throw ex;

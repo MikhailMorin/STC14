@@ -9,7 +9,7 @@ import java.util.Collection;
 
 public class Main {
     private static final Logger LOGGER =
-            Logger.getLogger(Main.class);
+            Logger.getLogger(Main.class.getSimpleName());
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
@@ -40,18 +40,14 @@ public class Main {
         for (Person person : pCol) {
             System.out.println(person);
             Collection<Subject> sCol = sDao.getSubjectsByPerson(person);
-            for (Subject subject : sCol) {
-                System.out.println(subject);
-            }
+            sCol.forEach(System.out::println);
         }
 
         pSubj = sDao.getAllSubjects();
         for (Subject subject : pSubj) {
             System.out.println(subject);
             pCol = pDao.getPersonsBySubject(subject);
-            for (Person person : pCol) {
-                System.out.println(person);
-            }
+            pCol.forEach(System.out::println);
         }
     }
 }

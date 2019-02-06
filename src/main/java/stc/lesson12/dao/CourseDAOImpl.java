@@ -10,8 +10,7 @@ import java.sql.*;
  * объектов типа course
  */
 public class CourseDAOImpl implements CourseDAO {
-    private static final Logger LOGGER =
-            Logger.getLogger(CourseDAOImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(CourseDAOImpl.class.getSimpleName());
 
     private final Connection connection;
 
@@ -29,19 +28,18 @@ public class CourseDAOImpl implements CourseDAO {
     @Override
     public void linkToCourse(Person person, Subject subject) throws SQLException {
         LOGGER.debug(String.format("Добавление в хранилище связи персоны %s с учебной дисциплиной %s",
-                       person.getName(), subject.getDescription()));
+                person.getName(), subject.getDescription()));
         try (PreparedStatement statement = connection.prepareStatement(SqlCourse.INSERT_COURSE.QUERY)) {
             statement.setInt(1, person.getId());
             statement.setInt(2, subject.getId());
             statement.setDate(3, new Date(System.currentTimeMillis()));
             statement.execute();
 
-            LOGGER.debug(String.format("Связь %s -> %s добавлена",
-                                        person.getName(), subject.getDescription()));
+            LOGGER.debug(String.format("Связь %s -> %s добавлена", person.getName(), subject.getDescription()));
         }
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище связи персоны %s с учебной дисциплиной %s",
-                    person.getName(), subject.getDescription()));
+                    person.getName(), subject.getDescription()), ex);
             ex.printStackTrace();
             throw ex;
         }
@@ -56,8 +54,7 @@ public class CourseDAOImpl implements CourseDAO {
      */
     @Override
     public void linkToCourse(Person person, Subject... subject) throws SQLException {
-        LOGGER.debug(String.format("Добавление в хранилище связи персоны %s со списком учебных дисциплин",
-                person.getName()));
+        LOGGER.debug(String.format("Добавление в хранилище связи персоны %s со списком учебных дисциплин", person.getName()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlCourse.INSERT_COURSE.QUERY)) {
             for (Subject s : subject) {
@@ -68,12 +65,11 @@ public class CourseDAOImpl implements CourseDAO {
             }
             statement.executeBatch();
 
-            LOGGER.debug(String.format("Связь персоны %s со списком учебных дисциплин добавлена",
-                    person.getName()));
+            LOGGER.debug(String.format("Связь персоны %s со списком учебных дисциплин добавлена", person.getName()));
         }
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище связи персоны %s со списком учебных дисциплин",
-                    person.getName()));
+                    person.getName()), ex);
 
             ex.printStackTrace();
             throw ex;
@@ -89,8 +85,7 @@ public class CourseDAOImpl implements CourseDAO {
      */
     @Override
     public void linkToCourse(Subject subject, Person... person) throws SQLException {
-        LOGGER.debug(String.format("Добавление в хранилище учебной дисциплины %s со списком персон",
-                subject.getDescription()));
+        LOGGER.debug(String.format("Добавление в хранилище учебной дисциплины %s со списком персон", subject.getDescription()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlCourse.INSERT_COURSE.QUERY)) {
             for (Person p : person) {
@@ -101,12 +96,11 @@ public class CourseDAOImpl implements CourseDAO {
             }
             statement.executeBatch();
 
-            LOGGER.debug(String.format("Связь учебной дисциплины %s со списком персон добавлена",
-                    subject.getDescription()));
+            LOGGER.debug(String.format("Связь учебной дисциплины %s со списком персон добавлена", subject.getDescription()));
         }
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище связи учебной дисциплины %s со списком персон",
-                    subject.getDescription()));
+                    subject.getDescription()), ex);
 
             ex.printStackTrace();
             throw ex;
