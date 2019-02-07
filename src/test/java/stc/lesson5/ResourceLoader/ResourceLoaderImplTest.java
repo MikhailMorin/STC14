@@ -56,8 +56,8 @@ class ResourceLoaderImplTest {
         Files.write(Paths.get(file.toURI()), content.getBytes());
         ResourceLoader rl = new ResourceLoaderImpl(file.getAbsolutePath());
 
-        String read = rl.openResource().lines().collect(Collectors.joining("\n"));
-        assertEquals(content, read);
+        BufferedReader br = rl.openResource();
+        assertEquals(content, br.readLine());
         tf.delete();
     }
 }
