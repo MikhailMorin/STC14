@@ -54,7 +54,7 @@ public class ResourceLoaderImpl implements ResourceLoader{
             return SourceType.HTTP;
         } else if (source.matches("^(ftps?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w.-]*)*/?$")) {
             return SourceType.FTP;
-        } else if(source.matches("((\\w{1}:|\\.)\\/([A-z]|[0-9]|\\s|\\/)+\\.\\w+)")) {
+        } else if(source.matches("((\\w{1}:|\\.)(\\/|\\\\)([A-z]|[0-9]|\\s|\\/|\\\\)+\\.\\w+)")) {
             return SourceType.FILE;
         }
         return SourceType.UNKNOWN;

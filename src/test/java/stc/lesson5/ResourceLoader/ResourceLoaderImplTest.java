@@ -54,7 +54,8 @@ class ResourceLoaderImplTest {
         tf.create();
         File file = tf.newFile();
         Files.write(Paths.get(file.toURI()), content.getBytes());
-        ResourceLoader rl = new ResourceLoaderImpl(file.getAbsolutePath().replaceAll("\\\\", "/"));
+        ResourceLoader rl = new ResourceLoaderImpl(file.getAbsolutePath());
+
         String read = rl.openResource().lines().collect(Collectors.joining("\n"));
         assertEquals(content, read);
         tf.delete();
