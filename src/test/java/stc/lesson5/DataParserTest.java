@@ -108,16 +108,14 @@ class DataParserTest {
     @Test
     void testRunException() throws IOException {
         Mockito.when(reader.readLine()).thenThrow(IOException.class);
-
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
         System.setErr(new PrintStream(errStream));
 
         dataParser = new DataParser(writer, reader, new HashSet<>(Arrays.asList(words)));
         dataParser.run();
 
-        assertEquals(
-                String.format("Ошибка при работе с ресурсами в %sjava.io.IOException\r\n", dataParser),
-                errStream.toString()
+        assertEquals(String.format("Ошибка при работе с ресурсами в %s java.io.IOException", dataParser.getName()),
+                     errStream.toString().trim()
         );
     }
 }

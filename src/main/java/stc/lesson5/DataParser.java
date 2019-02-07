@@ -168,7 +168,7 @@ public class DataParser extends Thread {
             System.out.println("ЗАПУСК " + this);
             parseFrom();
         } catch (IOException e) {
-            System.err.printf("Ошибка при работе с ресурсами в %s", this);
+            System.err.printf("Ошибка при работе с ресурсами в %s ", this.getName());
             e.printStackTrace();
         }
     }
