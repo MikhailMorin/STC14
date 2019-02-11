@@ -1,9 +1,10 @@
 package stc.lesson5;
 
+import org.apache.log4j.Logger;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 import org.mockito.stubbing.*;
-import stc.lesson5.ResourceLoader.ResourceLoader;
+import stc.lesson5.loader.ResourceLoader;
 
 import java.io.*;
 import java.util.*;
@@ -11,13 +12,16 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataParserTest {
-    private DataParser dataParser;
+    private static final Logger LOGGER =
+            Logger.getLogger(DataParserTest.class.getSimpleName());
 
+    private final String[] words = {"world", "java", "Innopolis", "программист", "Petersburg", "приложения"};
+
+    private DataParser dataParser;
     private BufferedReader reader;
     private BufferedWriter writer;
     private StringBuilder storageForWriter;
 
-    private final String[] words = {"world", "java", "Innopolis", "программист", "Petersburg", "приложения"};
 
     @BeforeEach
     void setUp() throws IOException {
