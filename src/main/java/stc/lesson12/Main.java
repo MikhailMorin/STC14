@@ -9,17 +9,16 @@ import java.util.Collection;
 
 public class Main {
     private static final Logger LOGGER =
-            Logger.getLogger(Main.class.getSimpleName());
+            Logger.getLogger(Main.class);
+    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    private static final String LOGIN = "postgres";
+    private static final String PASS = "masterkey";
 
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException, SQLStatementException {
         Class.forName("org.postgresql.Driver");
         LOGGER.info("START");
 
-        final String url = "jdbc:postgresql://localhost:5432/postgres";
-        final String login = "postgres";
-        final String pass = "masterkey";
-
-        Connection connection = DriverManager.getConnection(url, login, pass);
+        Connection connection = DriverManager.getConnection(URL, LOGIN, PASS);
         test(connection);
         connection.close();
     }
@@ -29,8 +28,7 @@ public class Main {
      * @param connection - соединение с БД
      * @throws SQLException
      */
-    private static void test(Connection connection) throws SQLException {
-        CourseDAO cDao = new CourseDAOImpl(connection);
+    private static void test(Connection connection) throws SQLStatementException {
         PersonDAO pDao = new PersonDAOImpl(connection);
         SubjectDAO sDao = new SubjectDAOImpl(connection);
         Collection<Person> pCol;
@@ -40,14 +38,14 @@ public class Main {
         for (Person person : pCol) {
             System.out.println(person);
             Collection<Subject> sCol = sDao.getSubjectsByPerson(person);
-            sCol.forEach(System.out::println);
+            sCol.forEach(LOGGER::debug);
         }
 
         pSubj = sDao.getAllSubjects();
         for (Subject subject : pSubj) {
             System.out.println(subject);
             pCol = pDao.getPersonsBySubject(subject);
-            pCol.forEach(System.out::println);
+            pCol.forEach(LOGGER::debug);
         }
     }
 }

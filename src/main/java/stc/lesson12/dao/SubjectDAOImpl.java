@@ -1,6 +1,7 @@
 package stc.lesson12.dao;
 
 import org.apache.log4j.Logger;
+import stc.lesson12.SQLStatementException;
 import stc.lesson12.entitie.*;
 
 import java.sql.*;
@@ -12,7 +13,7 @@ import java.util.*;
  */
 public class SubjectDAOImpl implements SubjectDAO {
     private static final Logger LOGGER =
-            Logger.getLogger(SubjectDAOImpl.class.getSimpleName());
+            Logger.getLogger(SubjectDAOImpl.class);
 
     private final Connection connection;
     public SubjectDAOImpl(Connection connection) {
@@ -24,10 +25,11 @@ public class SubjectDAOImpl implements SubjectDAO {
      * При успешном добавлении записии возвращается соответствующий subject_id,
      * которым инициализируется соответствующее поле переданного в метод объекта.
      * @param subject - добавляемая запись
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public void createSubject(Subject subject) throws SQLException {
+    public void createSubject(Subject subject) throws SQLStatementException {
         LOGGER.debug(String.format("Добавление в хранилище учебной дисциплины %s", subject.getDescription()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlSubject.INSERT_SUBJECT.QUERY)) {
@@ -42,19 +44,18 @@ public class SubjectDAOImpl implements SubjectDAO {
         }
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище учебной дисциплины %s", subject.getDescription()), ex);
-
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 
     /**
      * Изменение записи (с соответствующим subject_id) в таблице person
      * @param subject - изменяемая запись
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public void updateSubject(Subject subject) throws SQLException {
+    public void updateSubject(Subject subject) throws SQLStatementException {
         LOGGER.debug(String.format("Изменения в хранилище для учебной дисциплины с id = %d", subject.getId()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlSubject.UPDATE_SUBJECT.QUERY)) {
@@ -66,18 +67,18 @@ public class SubjectDAOImpl implements SubjectDAO {
         }
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка изменения в хранилище учебной дисциплины с id = %s", subject.getId()), ex);
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 
     /**
      * Удалние записи (с соответствующим subject_id) из таблицы subject
      * @param subject - удаляемая запись
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public void deleteSubject(Subject subject) throws SQLException {
+    public void deleteSubject(Subject subject) throws SQLStatementException {
         LOGGER.debug(String.format("Удаление из хранилища учебной дисциплины с id = %d", subject.getId()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlSubject.DELETE_SUBJECT.QUERY)) {
@@ -88,18 +89,18 @@ public class SubjectDAOImpl implements SubjectDAO {
         }
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка удаления из хранилища учебной дисциплины с id = %s", subject.getId()), ex);
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 
     /**
      * Получение списка всех учебных дисциплин из таблицы subject
      * @return - список учебных дисциплин
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public Collection<Subject> getAllSubjects() throws SQLException {
+    public Collection<Subject> getAllSubjects() throws SQLStatementException {
         LOGGER.debug("Получение списка учебных дисциплин из хранилища");
         try (PreparedStatement statement = connection.prepareStatement(SqlSubject.GET_ALL_SUBJECTS.QUERY)) {
             ResultSet set = statement.executeQuery();
@@ -109,18 +110,18 @@ public class SubjectDAOImpl implements SubjectDAO {
         }
         catch (SQLException ex){
             LOGGER.error("Ошибка при получении списка учебных дисциплин", ex);
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 
     /**
      * Получение списка учебных дисциплин, соответствующих определенной персоне.
      * @return - список учебных дисциплин
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public Collection<Subject> getSubjectsByPerson(Person person) throws SQLException {
+    public Collection<Subject> getSubjectsByPerson(Person person) throws SQLStatementException {
         LOGGER.debug("Получение списка учебных дисциплин для персоны " + person.getName());
         try (PreparedStatement statement = connection.prepareStatement(SqlSubject.GET_SUBJECTS_BY_PERSON.QUERY)) {
             statement.setInt(1, person.getId());
@@ -131,9 +132,7 @@ public class SubjectDAOImpl implements SubjectDAO {
         }
         catch (SQLException ex){
             LOGGER.error("Ошибка при получении списка учебных дисциплин для персоны " + person.getName(), ex);
-
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
 
     }
@@ -142,7 +141,8 @@ public class SubjectDAOImpl implements SubjectDAO {
      * Создание коллекции объектов Subject по полученому из хранилища ответе.
      * @param set - полученый из хранилища ответ.
      * @return - результирующая коллекция.
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     private Collection<Subject> createSubjectsByResult(ResultSet set) throws SQLException {
         final Collection<Subject> subjectsCollection = new ArrayList<>();

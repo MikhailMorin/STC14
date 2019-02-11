@@ -1,6 +1,7 @@
 package stc.lesson12.dao;
 
 import org.apache.log4j.Logger;
+import stc.lesson12.SQLStatementException;
 import stc.lesson12.entitie.*;
 
 import java.sql.*;
@@ -10,7 +11,7 @@ import java.sql.*;
  * объектов типа course
  */
 public class CourseDAOImpl implements CourseDAO {
-    private static final Logger LOGGER = Logger.getLogger(CourseDAOImpl.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger(CourseDAOImpl.class);
 
     private final Connection connection;
 
@@ -23,10 +24,11 @@ public class CourseDAOImpl implements CourseDAO {
      * Добавляет соответствующую запись в таблицу course.
      * @param person - персона
      * @param subject - учебная дисциплина
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public void linkToCourse(Person person, Subject subject) throws SQLException {
+    public void linkToCourse(Person person, Subject subject) throws SQLStatementException {
         LOGGER.debug(String.format("Добавление в хранилище связи персоны %s с учебной дисциплиной %s",
                 person.getName(), subject.getDescription()));
         try (PreparedStatement statement = connection.prepareStatement(SqlCourse.INSERT_COURSE.QUERY)) {
@@ -40,8 +42,7 @@ public class CourseDAOImpl implements CourseDAO {
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище связи персоны %s с учебной дисциплиной %s",
                     person.getName(), subject.getDescription()), ex);
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 
@@ -50,10 +51,11 @@ public class CourseDAOImpl implements CourseDAO {
      * Добавляет соответствующие записи в таблицу course.
      * @param person - персона
      * @param subject - связываемые с персоной учебные дисциплины.
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public void linkToCourse(Person person, Subject... subject) throws SQLException {
+    public void linkToCourse(Person person, Subject... subject) throws SQLStatementException {
         LOGGER.debug(String.format("Добавление в хранилище связи персоны %s со списком учебных дисциплин", person.getName()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlCourse.INSERT_COURSE.QUERY)) {
@@ -70,9 +72,7 @@ public class CourseDAOImpl implements CourseDAO {
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище связи персоны %s со списком учебных дисциплин",
                     person.getName()), ex);
-
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 
@@ -81,10 +81,11 @@ public class CourseDAOImpl implements CourseDAO {
      * Добавляет соответствующие записи в таблицу course
      * @param subject - учебная дисциплина.
      * @param person - связываемые с учебной дисциплиной персоны.
-     * @throws SQLException
+     * @throws SQLStatementException - исключение, выбрасываемое при возникновении
+     * ошибки при работе с объектом типа {@code PreparedStatement}
      */
     @Override
-    public void linkToCourse(Subject subject, Person... person) throws SQLException {
+    public void linkToCourse(Subject subject, Person... person) throws SQLStatementException {
         LOGGER.debug(String.format("Добавление в хранилище учебной дисциплины %s со списком персон", subject.getDescription()));
 
         try (PreparedStatement statement = connection.prepareStatement(SqlCourse.INSERT_COURSE.QUERY)) {
@@ -101,9 +102,7 @@ public class CourseDAOImpl implements CourseDAO {
         catch (SQLException ex){
             LOGGER.error(String.format("Ошибка при добавлении в хранилище связи учебной дисциплины %s со списком персон",
                     subject.getDescription()), ex);
-
-            ex.printStackTrace();
-            throw ex;
+            throw new SQLStatementException();
         }
     }
 

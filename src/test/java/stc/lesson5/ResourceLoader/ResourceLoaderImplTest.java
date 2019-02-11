@@ -52,18 +52,16 @@ class ResourceLoaderImplTest {
     @Test
     void openLocalResource() throws IOException {
         Files.createDirectories(Paths.get(LOCAL_RESOURCE_DIR));
-
         final String localFilename = LOCAL_RESOURCE_DIR + "out.txt";
 
         Files.write(Paths.get(localFilename), CONTENT.getBytes());
-        ResourceLoader rl = new ResourceLoaderImpl(localFilename);
-        BufferedReader br = rl.openResource();
+        ResourceLoader resourceLoader = new ResourceLoaderImpl(localFilename);
+        BufferedReader reader = resourceLoader.openResource();
 
-        assertEquals(CONTENT, br.readLine());
+        assertEquals(CONTENT, reader.readLine());
 
-        br.close();
+        reader.close();
         Files.delete(Paths.get(localFilename));
-
     }
 }
 
