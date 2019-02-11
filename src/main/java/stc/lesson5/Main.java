@@ -1,6 +1,6 @@
 package stc.lesson5;
 
-import stc.lesson5.ResourceLoader.ResourceLoaderImpl;
+import stc.lesson5.loader.ResourceLoaderImpl;
 
 import java.io.*;
 import java.net.URI;
@@ -14,11 +14,6 @@ public class Main {
     private static final String OUTPUT_DIR = "./target/out/";
 
     public static void main(String[] args) throws IOException {
-
-        System.out.println(URI.create("C:/Users/Mikhail/.pgAdmin4.1590372639.log").getScheme());
-        if(true)
-            return;
-
         final String[] words = {"yourself", "программист", "приложения"};
         final String[] resources = {INPUT_DIR + "warpeace.txt",
                                           "https://habr.com/ru/post/321344/",

@@ -1,9 +1,5 @@
 package stc.lesson5;
 
-import org.jsoup.Jsoup;
-import stc.lesson5.ResourceLoader.ResourceLoader;
-import stc.lesson5.ResourceLoader.ResourceLoaderImpl;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;

@@ -1,4 +1,4 @@
-package stc.lesson5.ResourceLoader;
+package stc.lesson5.loader;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
